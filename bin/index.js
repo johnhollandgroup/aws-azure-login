@@ -21,6 +21,7 @@ commander
     .option("--enable-chrome-network-service", "Enable Chromium's Network Service (needed when login provider redirects with 3XX)")
     .option("--no-verify-ssl", "Disable SSL Peer Verification for connections to AWS (no effect if behind proxy)")
     .option("--enable-chrome-seamless-sso", "Enable Chromium's pass-through authentication with Azure Active Directory Seamless Single Sign-On")
+    .option("--delay", "Introduce a custom delay between page loads (useful for slow connections). Use 1 for standard delay, 2 for double the delay, etc.")
     .option("--no-disable-extensions", "Tell Puppeteer not to pass the --disable-extensions flag to Chromium")
     .parse(process.argv);
 
@@ -31,9 +32,9 @@ const noPrompt = !commander.prompt;
 const enableChromeNetworkService = commander.enableChromeNetworkService;
 const awsNoVerifySsl = !commander.verifySsl;
 const enableChromeSeamlessSso = commander.enableChromeSeamlessSso;
+const customDelayModifier = commander.delay || 1;
 const forceRefresh = commander.forceRefresh;
 const noDisableExtensions = !commander.disableExtensions;
-
 
 Promise.resolve()
     .then(() => {
@@ -42,7 +43,7 @@ Promise.resolve()
         }
 
         if (commander.configure) return configureProfileAsync(profileName);
-        return login.loginAsync(profileName, mode, disableSandbox, noPrompt, enableChromeNetworkService, awsNoVerifySsl, enableChromeSeamlessSso, noDisableExtensions);
+        return login.loginAsync(profileName, mode, disableSandbox, noPrompt, enableChromeNetworkService, awsNoVerifySsl, enableChromeSeamlessSso, customDelayModifier, noDisableExtensions);
     })
     .catch(err => {
         if (err.name === "CLIError") {
